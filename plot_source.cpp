@@ -1,4 +1,4 @@
-// * source for plot builder
+﻿// * source for plot builder
 // *
 
 #include "plot_source.h"
@@ -314,6 +314,8 @@ int main()
 	std::getline(std::cin, expr);
 	_parseData::_node* tree = parseExpression(_parseData::_substring(expr));
 	_parseData::_node* derivative = tree->derivative();
+	tree->printBT("", false);
+	derivative->printBT("", false);
 	float x;
 	do
 	{
