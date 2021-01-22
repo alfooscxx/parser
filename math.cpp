@@ -20,18 +20,15 @@ _parseData::_node* _parseData::_nodeOperator::derivative() const
 	switch (this->operation)
 	{
 	case _nodeOperation::ADDITION:
-		return binary_operation(this->firstOperand->derivative(), this->secondOperand->derivative(), _nodeOperation::ADDITION);
 	case _nodeOperation::SUBTRACTION:
-		return binary_operation(this->firstOperand->derivative(), this->secondOperand->derivative(), _nodeOperation::SUBTRACTION);
+		return binary_operation(this->firstOperand->derivative(), this->secondOperand->derivative(), this->operation);
 	case _nodeOperation::MULTIPLICATION:
 		first = binary_operation(this->firstOperand, this->secondOperand->derivative(), _nodeOperation::MULTIPLICATION);
 		second = binary_operation(this->firstOperand->derivative(), this->secondOperand, _nodeOperation::MULTIPLICATION);
-		result = binary_operation(first, second, _nodeOperation::ADDITION);
+		return binary_operation(first, second, _nodeOperation::ADDITION);
 	default:
-		result = new _node;
-		break;
+		throw "bad operation";
 	}
-	return result;
 }
 
 _parseData::_node* _parseData::_nodeFunction::derivative() const
@@ -65,8 +62,7 @@ _parseData::_node* _parseData::_nodeFunction::derivative() const
 		result = binary_operation(koeff, binary_operation(func1, func2, _nodeOperation::MULTIPLICATION), _nodeOperation::DIVISION);
 		break;
 	default:
-		result = new _node;
-		break;
+		throw "bad operation";
 	}
 	return binary_operation(result, internalDerivative, _nodeOperation::MULTIPLICATION);
 }
