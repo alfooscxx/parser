@@ -17,23 +17,23 @@ const float _parseData::_nodeOperator::operator()(const float x) const noexcept
 {
 	switch (operation)
 	{
-		case _nodeOperation::ADDITION:
-			return((*firstOperand)(x) + (*secondOperand)(x));
-			break;
-		case _nodeOperation::SUBTRACTION:
-			return((*firstOperand)(x) - (*secondOperand)(x));
-			break;
-		case _nodeOperation::MULTIPLICATION:
-			return((*firstOperand)(x) * (*secondOperand)(x));
-			break;
-		case _nodeOperation::DIVISION:
-			return((*firstOperand)(x) / (*secondOperand)(x));
-			break;
-		case _nodeOperation::POWER:
-			return(pow((*firstOperand)(x), (*secondOperand)(x)));
-			break;
-		default:
-			break;
+	case _nodeOperation::ADDITION:
+		return((*firstOperand)(x) + (*secondOperand)(x));
+		break;
+	case _nodeOperation::SUBTRACTION:
+		return((*firstOperand)(x) - (*secondOperand)(x));
+		break;
+	case _nodeOperation::MULTIPLICATION:
+		return((*firstOperand)(x) * (*secondOperand)(x));
+		break;
+	case _nodeOperation::DIVISION:
+		return((*firstOperand)(x) / (*secondOperand)(x));
+		break;
+	case _nodeOperation::POWER:
+		return(pow((*firstOperand)(x), (*secondOperand)(x)));
+		break;
+	default:
+		break;
 	}
 }
 
@@ -41,26 +41,26 @@ const float _parseData::_nodeFunction::operator()(const float x) const
 {
 	switch (this->operation)
 	{
-		case _nodeOperation::COS:
-			return cosf((*argument)(x));
-			break;	
-		case _nodeOperation::CTAN:
-			return 1 / tanf((*argument)(x));
-			break;
-		case _nodeOperation::EXP:
-			return expf((*argument)(x));
-			break;
-		case _nodeOperation::LOG:
-			return logf((*argument)(x));
-			break;
-		case _nodeOperation::SIN:
-			return sinf((*argument)(x));
-			break;
-		case _nodeOperation::TAN:
-			return tanf((*argument)(x));
-			break;
-		default:
-			break;
+	case _nodeOperation::COS:
+		return cosf((*argument)(x));
+		break;
+	case _nodeOperation::CTAN:
+		return 1 / tanf((*argument)(x));
+		break;
+	case _nodeOperation::EXP:
+		return expf((*argument)(x));
+		break;
+	case _nodeOperation::LOG:
+		return logf((*argument)(x));
+		break;
+	case _nodeOperation::SIN:
+		return sinf((*argument)(x));
+		break;
+	case _nodeOperation::TAN:
+		return tanf((*argument)(x));
+		break;
+	default:
+		break;
 	}
 }
 
@@ -150,7 +150,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		return _parseData::_nodeexpr(resultString, result);
 	}
 	}
-	if(isWord(substring, subBegin, "sqrt"))
+	if (isWord(substring, subBegin, "sqrt"))
 	{
 		_parseData::_substring squareArg = substring;
 		squareArg.begin = subBegin + 4;
@@ -160,7 +160,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeOperator* sqrt = binary_operation(squareArgFunc.node, power, _parseData::_nodeOperation::POWER);
 		return _parseData::_nodeexpr(resultString, sqrt);
 	}
-	else if(isWord(substring, subBegin, "sin"))
+	else if (isWord(substring, subBegin, "sin"))
 	{
 		_parseData::_substring sinArg = substring;
 		sinArg.begin = subBegin + 3;
@@ -169,7 +169,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeFunction* sin = new _parseData::_nodeFunction(sinArgFunc.node, _parseData::_nodeOperation::SIN);
 		return _parseData::_nodeexpr(resultString, sin);
 	}
-	else if(isWord(substring, subBegin, "cos"))
+	else if (isWord(substring, subBegin, "cos"))
 	{
 		_parseData::_substring cosArg = substring;
 		cosArg.begin = subBegin + 3;
@@ -178,7 +178,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeFunction* cos = new _parseData::_nodeFunction(cosArgFunc.node, _parseData::_nodeOperation::COS);
 		return _parseData::_nodeexpr(resultString, cos);
 	}
-	else if(isWord(substring, subBegin, "ctg"))
+	else if (isWord(substring, subBegin, "ctg"))
 	{
 		_parseData::_substring ctgArg = substring;
 		ctgArg.begin = subBegin + 3;
@@ -187,7 +187,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeFunction* ctan = new _parseData::_nodeFunction(ctgArgFunc.node, _parseData::_nodeOperation::CTAN);
 		return _parseData::_nodeexpr(resultString, ctan);
 	}
-	else if(isWord(substring, subBegin, "tan"))
+	else if (isWord(substring, subBegin, "tan"))
 	{
 		_parseData::_substring tgArg = substring;
 		tgArg.begin = subBegin + 3;
@@ -196,7 +196,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeFunction* tan = new _parseData::_nodeFunction(tgArgFunc.node, _parseData::_nodeOperation::TAN);
 		return _parseData::_nodeexpr(resultString, tan);
 	}
-	else if(isWord(substring, subBegin, "exp"))
+	else if (isWord(substring, subBegin, "exp"))
 	{
 		_parseData::_substring expArg = substring;
 		expArg.begin = subBegin + 3;
@@ -205,7 +205,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 		_parseData::_nodeFunction* exp = new _parseData::_nodeFunction(expArgFunc.node, _parseData::_nodeOperation::EXP);
 		return _parseData::_nodeexpr(resultString, exp);
 	}
-	else if(isWord(substring, subBegin, "log"))
+	else if (isWord(substring, subBegin, "log"))
 	{
 		_parseData::_substring logArg = substring;
 		logArg.begin = subBegin + 3;
@@ -233,7 +233,7 @@ _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring
 
 bool isWord(_parseData::_substring string, size_t wordBegin, std::string word)
 {
-	for(size_t i = 0; i < word.length(); ++i)
+	for (size_t i = 0; i < word.length(); ++i)
 	{
 		if (wordBegin + i > string.end)
 			return false;
@@ -297,6 +297,15 @@ _parseData::_node* parseExpression(const _parseData::_substring& expr)
 	}
 }
 
+_plotData::function getFunction(std::string expr)
+{
+	_parseData::_node* tree = parseExpression(_parseData::_substring(expr));
+	return _plotData::function([=](const float x)
+	{
+		return (*tree)(x);
+	});
+}
+
 #include <iostream>
 
 int main()
@@ -304,11 +313,13 @@ int main()
 	std::string expr;
 	std::getline(std::cin, expr);
 	_parseData::_node* tree = parseExpression(_parseData::_substring(expr));
+	_parseData::_node* derivative = tree->derivative();
 	float x;
 	do
 	{
 		std::cin >> x;
 		std::cout << (*tree)(x) << std::endl;
+		std::cout << (*derivative)(x) << std::endl;
 	} while (x != 0);
 	return 0;
 }
