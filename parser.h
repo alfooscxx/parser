@@ -10,56 +10,30 @@
 #include <cmath> //? std math functions
 #include <iostream>
 
-// * type aliasing
-struct _plotData
-{
-	using function = std::function<float(float)>;
-};
-
 // * details of parser implementation
 
 //* DEBUG INFORMATION
 
 // * TREE PRINTING
 
-static const char *Operations[] =
+static const std::string Operations[] =
 {
 	" + ",
 	" - ",
 	" * ",
 	" / ",
 	" ^ ",
-	" x ",
-	"Const",
-	" sin ",
-	" cos ",
-	" tan ",
-	" ctg ",
-	" exp ",
-	" log ",
+	"sin",
+	"cos",
+	"tan",
+	"ctg",
+	"exp",
+	"log",
+	"sqrt"
 };
 
-struct _parseData
+namespace _parseData
 {
-	enum _nodeOperation
-	{
-		ADDITION = 0,
-		SUBTRACTION,
-		MULTIPLICATION,
-		DIVISION,
-		POWER,
-		IDENTICAL,
-		CONSTANT,
-		SIN,
-		COS,
-		TAN,
-		CTAN,
-		EXP,
-		LOG,
-		//even the sky,
-		//Allah himself...
-	};
-
 	struct _substring
 	{
 		std::string expression;
@@ -87,12 +61,14 @@ struct _parseData
 	class _node
 	{
 	public:
-		_nodeOperation operation;
-		_node()
-		{
-			operation = _nodeOperation::IDENTICAL;
-		}
-		virtual const float operator()(const float x) const { return x; }
+		_node() {}
+		// * copy constructor
+		_node(const _node& _node) 
+			{}
+
+		virtual ~_node() {}
+		
+		virtual const double operator()(const double x) const { return x; }
 
 		virtual _node* derivative() const;
 
@@ -110,14 +86,20 @@ struct _parseData
 	class _nodeConst : public _node
 	{
 	private:
-		float const_value;
+		double const_value;
 	public:
-		_nodeConst(float _value)
+		_nodeConst(double _value)
 			: const_value(_value)
+			{}
+		// * copy constructor
+		_nodeConst(const _nodeConst& _nodeConst)
 		{
-			this->operation = _nodeOperation::CONSTANT;
+			const_value = _nodeConst.const_value;
 		}
-		virtual const float operator()(const float x) const noexcept { return const_value; }
+
+		virtual ~_nodeConst() {}
+
+		virtual const double operator()(const double x) const noexcept { return const_value; }
 
 		virtual _node* derivative() const;
 
@@ -128,7 +110,7 @@ struct _parseData
 			std::cout << (isLeft ? "|---" : " ---");
 
 			// print the value of the node
-			std::cout << const_value << std::endl;
+			std::cout << " " <<  const_value << std::endl;
 		}
 	};
 	// * child class containing different algebraic functions
@@ -137,12 +119,32 @@ struct _parseData
 	private:
 		_node * argument;
 	public:
-		_nodeFunction(_node* _argument, _nodeOperation FUNCTION_TYPE)
+		enum class _function
+		{
+			SIN,
+			COS,
+			TAN,
+			CTAN,
+			EXP,
+			LOG,
+		};
+
+		_function function;
+
+		_nodeFunction(_node* _argument, _function FUNCTION_TYPE)
 			: argument(_argument)
 		{
-			this->operation = FUNCTION_TYPE;
+			function = FUNCTION_TYPE;
 		}
-		virtual const float operator()(const float x) const;
+		_nodeFunction(const _nodeFunction& _nodeFunction)
+		{
+			argument = _nodeFunction.argument;
+			function = _nodeFunction.function;
+		}
+
+		virtual ~_nodeFunction();
+
+		virtual const double operator()(const double x) const;
 
 		virtual _node* derivative() const;
 
@@ -153,7 +155,7 @@ struct _parseData
 			std::cout << (isLeft ? "|---" : " ---");
 
 			// print the value of the node
-			std::cout << Operations[operation] << std::endl;
+			std::cout << Operations[static_cast<int>(function) + 5] << std::endl;
 
 			// enter the next tree level - left and right branch
 			argument->printBT(prefix + (isLeft ? "|   " : "    "), false);
@@ -166,15 +168,35 @@ struct _parseData
 		_node * firstOperand;
 		_node* secondOperand;
 	public:
+		enum class _operation
+		{
+			ADDITION,
+			SUBTRACTION,
+			MULTIPLICATION,
+			DIVISION,
+			POWER,
+		};
+
+		_operation operation;
+
 		_nodeOperator(_node* _first, _node* _second)
 			: firstOperand(_first), secondOperand(_second)
 		{}
-		_nodeOperator(_node* _first, _node* _second, _nodeOperation OPERATION_TYPE)
+		_nodeOperator(_node* _first, _node* _second, _operation OPERATION_TYPE)
 			: firstOperand(_first), secondOperand(_second)
 		{
-			this->operation = OPERATION_TYPE;
+			operation = OPERATION_TYPE;
 		}
-		virtual const float operator()(const float x) const noexcept;
+		_nodeOperator(const _nodeOperator& _nodeOperator)
+		{
+			firstOperand = _nodeOperator.firstOperand;
+			secondOperand = _nodeOperator.secondOperand;
+			operation = _nodeOperator.operation;
+		}
+
+		virtual ~_nodeOperator();
+
+		virtual const double operator()(const double x) const noexcept;
 
 		virtual _node* derivative() const;
 
@@ -185,7 +207,7 @@ struct _parseData
 			std::cout << (isLeft ? "|---" : " ---");
 
 			// print the value of the node
-			std::cout << Operations[operation] << std::endl;
+			std::cout << Operations[static_cast<int>(operation)] << std::endl;
 
 			// enter the next tree level - left and right branch
 			firstOperand->printBT(prefix + (isLeft ? "|   " : "    "), true);
@@ -205,10 +227,10 @@ struct _parseData
 };
 
 // * some functions declarations
-size_t findOperator(const _parseData::_substring& _expression, const _parseData::_nodeOperation operation);
+size_t findOperator(const _parseData::_substring& _expression, const _parseData::_nodeOperator::_operation operation);
 _parseData::_node* parseExpression(const _parseData::_substring& expr);
 _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring);
-_parseData::_nodeOperator* binary_operation(_parseData::_node* first, _parseData::_node* second, _parseData::_nodeOperation operation);
+_parseData::_nodeOperator* binary_operation(_parseData::_node* first, _parseData::_node* second, _parseData::_nodeOperator::_operation operation);
 bool isWord(_parseData::_substring string, size_t wordBegin, std::string word);
 
 // * ifndef _PLOT_SOURCE_H_
