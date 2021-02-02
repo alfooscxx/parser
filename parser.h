@@ -63,14 +63,21 @@ namespace _parseData
 	public:
 		_node() {}
 		// * copy constructor
-		_node(const _node& _node) 
-			{}
+		_node(const _node& _node)
+		{}
 
 		virtual ~_node() {}
-		
+
+		virtual _node* clone() const
+		{
+			return new _node(*this);
+		}
+
 		virtual const double operator()(const double x) const { return x; }
 
 		virtual _node* derivative() const;
+
+		virtual _node* simplify() { return this; }
 
 		virtual void printBT(const std::string& prefix, bool isLeft)
 		{
@@ -90,7 +97,7 @@ namespace _parseData
 	public:
 		_nodeConst(double _value)
 			: const_value(_value)
-			{}
+		{}
 		// * copy constructor
 		_nodeConst(const _nodeConst& _nodeConst)
 		{
@@ -99,9 +106,16 @@ namespace _parseData
 
 		virtual ~_nodeConst() {}
 
+		virtual _nodeConst* clone() const override
+		{
+			return new _nodeConst(*this);
+		}
+
 		virtual const double operator()(const double x) const noexcept { return const_value; }
 
 		virtual _node* derivative() const;
+
+		virtual _node* simplify() { return this; }
 
 		virtual void printBT(const std::string& prefix, bool isLeft)
 		{
@@ -110,7 +124,7 @@ namespace _parseData
 			std::cout << (isLeft ? "|---" : " ---");
 
 			// print the value of the node
-			std::cout << " " <<  const_value << std::endl;
+			std::cout << " " << const_value << std::endl;
 		}
 	};
 	// * child class containing different algebraic functions
@@ -131,6 +145,8 @@ namespace _parseData
 
 		_function function;
 
+		_nodeFunction()
+		{}
 		_nodeFunction(_node* _argument, _function FUNCTION_TYPE)
 			: argument(_argument)
 		{
@@ -144,9 +160,19 @@ namespace _parseData
 
 		virtual ~_nodeFunction();
 
+		virtual _nodeFunction* clone() const override
+		{
+			_nodeFunction* result = new _nodeFunction;
+			result->argument = argument->clone();
+			result->function = function;
+			return result;
+		}
+
 		virtual const double operator()(const double x) const;
 
 		virtual _node* derivative() const;
+
+		virtual _node* simplify();
 
 		virtual void printBT(const std::string& prefix, bool isLeft)
 		{
@@ -179,6 +205,8 @@ namespace _parseData
 
 		_operation operation;
 
+		_nodeOperator()
+		{}
 		_nodeOperator(_node* _first, _node* _second)
 			: firstOperand(_first), secondOperand(_second)
 		{}
@@ -196,9 +224,20 @@ namespace _parseData
 
 		virtual ~_nodeOperator();
 
+		virtual _nodeOperator* clone() const override
+		{
+			_nodeOperator* result = new _nodeOperator;
+			result->firstOperand = firstOperand->clone();
+			result->secondOperand = secondOperand->clone();
+			result->operation = operation;
+			return result;
+		}
+
 		virtual const double operator()(const double x) const noexcept;
 
 		virtual _node* derivative() const;
+
+		virtual _node* simplify();
 
 		virtual void printBT(const std::string& prefix, bool isLeft)
 		{
@@ -232,6 +271,8 @@ _parseData::_node* parseExpression(const _parseData::_substring& expr);
 _parseData::_nodeexpr parseSubexpression(const _parseData::_substring& substring);
 _parseData::_nodeOperator* binary_operation(_parseData::_node* first, _parseData::_node* second, _parseData::_nodeOperator::_operation operation);
 bool isWord(_parseData::_substring string, size_t wordBegin, std::string word);
+std::function<double(double)> getFunction(std::string expr);
+std::function<double(double)> getKDerivative(std::string expr, unsigned k);
 
 // * ifndef _PLOT_SOURCE_H_
 #endif

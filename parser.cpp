@@ -44,22 +44,22 @@ const double _nodeFunction::operator()(const double x) const
 	switch (this->function)
 	{
 	case _nodeFunction::_function::COS:
-		return cosf((*argument)(x));
+		return cos((*argument)(x));
 		break;
 	case _nodeFunction::_function::CTAN:
-		return 1 / tanf((*argument)(x));
+		return 1 / tan((*argument)(x));
 		break;
 	case _nodeFunction::_function::EXP:
-		return expf((*argument)(x));
+		return exp((*argument)(x));
 		break;
 	case _nodeFunction::_function::LOG:
-		return logf((*argument)(x));
+		return log((*argument)(x));
 		break;
 	case _nodeFunction::_function::SIN:
-		return sinf((*argument)(x));
+		return sin((*argument)(x));
 		break;
 	case _nodeFunction::_function::TAN:
-		return tanf((*argument)(x));
+		return tan((*argument)(x));
 		break;
 	default:
 		break;
@@ -165,28 +165,24 @@ _nodeexpr parseSubexpression(const _substring& substring)
 		return _nodeexpr(resultString, result);
 	}
 	}
-	if (isWord(substring, subBegin, "sqrt"))
+	for (int i = 5; i < 12; ++i)
 	{
-		_substring squareArg = substring;
-		squareArg.begin = subBegin + 4;
-		_nodeexpr squareArgFunc = parseSubexpression(squareArg);
-		subEnd = squareArgFunc.expression.end;
-		_nodeConst* power = new _nodeConst(0.5);
-		_nodeOperator* sqrt = binary_operation(squareArgFunc.node, power, _nodeOperator::_operation::POWER);
-		return _nodeexpr(resultString, sqrt);
-	}
-	else
-	{
-		for (int i = 5; i < 11; ++i)
+		if (isWord(substring, subBegin, Operations[i]))
 		{
-			if (isWord(substring, subBegin, Operations[i]))
+			_substring arg = substring;
+			arg.begin = subBegin + (Operations[i]).size();
+			_nodeexpr argFunc = parseSubexpression(arg);
+			resultString.end = argFunc.expression.end;
+			if (i != 11)
 			{
-				_substring arg = substring;
-				arg.begin = subBegin + (Operations[i]).size();
-				_nodeexpr argFunc = parseSubexpression(arg);
-				resultString.end = argFunc.expression.end;
 				_nodeFunction* func = new _nodeFunction(argFunc.node, static_cast<_nodeFunction::_function>(i - 5));
 				return _nodeexpr(resultString, func);
+			}
+			else
+			{
+				_nodeConst* power = new _nodeConst(0.5);
+				_nodeOperator* sqrt = binary_operation(argFunc.node, power, _nodeOperator::_operation::POWER);
+				return _nodeexpr(resultString, sqrt);
 			}
 		}
 	}
@@ -241,7 +237,7 @@ _node* parseExpression(const _substring& expr)
 	if (expr[firstExpr.expression.end + 1] != '^')
 	{
 		// can throw an exception if the expression cannot be parsed
-		// returns a product of the first subexpr and the rest of the expression
+		// returns product of the first subexpr and the rest of the expression
 		_node* restFunction = parseExpression(_substring(expr.expression,
 			firstExpr.expression.end + 1,
 			end));
@@ -279,22 +275,25 @@ std::function<double(double)> getKDerivative(std::string expr, unsigned k = 1)
 	});
 }
 
+// EXAMPLE
+//
 int main()
 {
 	std::string expr;
 	std::getline(std::cin, expr);
 	_node* tree = parseExpression(_substring(expr));
+	tree = tree->simplify();
 	_node* derivative = tree->derivative();
+	derivative = derivative->simplify();
 	tree->printBT("", false);
 	derivative->printBT("", false);
-	std::function<double(double)> func = getFunction(expr);
-	std::function<double(double)> der = getKDerivative(expr, 1);
+	//delete derivative;
 	double x;
 	do
 	{
 		std::cin >> x;
-		std::cout << func(x) << std::endl;
-		std::cout << der(x) << std::endl;
+		std::cout << (*tree)(x) << std::endl;
+		std::cout << (*derivative)(x) << std::endl;
 	} while (x != 0);
 	return 0;
 }
